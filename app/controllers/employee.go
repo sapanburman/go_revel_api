@@ -13,6 +13,10 @@ type Employee struct {
 	*revel.Controller
 }
 
+type Login struct {
+	*revel.Controller
+}
+
 func (c Employee) RegisterEmp() revel.Result {
 	reqBody:=c.Request
 	err:=reqBody.ParseForm()
@@ -33,6 +37,26 @@ func (c Employee) RegisterEmp() revel.Result {
 	if empRegister ==true{
 		return c.RenderText("User successfully register ")
 	}
+	return c.RenderText("Somthing was wrong,Try later")
+}
 
-	return c.RenderText("Somthing was wrong")
+func (c Login) login() revel.Result {
+	reqBody:=c.Request
+	formData:=models.Credentials{
+		Password: reqBody.FormValue("password"),
+		Email:    reqBody.FormValue("email"),
+	}
+
+	// Check in your db if the user exists or not
+	isValid:=models.CheckPass(formData)
+	if isValid{
+		tokens, err := models.GenerateTokenPair(formData.Email)
+		if err != nil {
+			return c.RenderText("Somthing was wrong")
+		}
+
+		return c.RenderJSON(tokens)
+	}
+
+	return c.RenderText("ErrUnauthorized")
 }

@@ -7,5 +7,6 @@ CREATE TABLE Employee(
     `phone` varchar (10) NOT NULL ,
     `registrationAt` TIMESTAMP NULL DEFAULT NULL,
     `updateAt` TIMESTAMP NULL DEFAULT NULL ,
-    UNIQUE KEY `email` (`email`)
+    UNIQUE KEY `email` (`email`) ,
+    UNIQUE KEY `phone` (`phone`)
 );
