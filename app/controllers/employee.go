@@ -1,7 +1,6 @@
 package controllers
 
 import (
-
 	"github.com/revel/revel"
 	"log"
 	"revelapi/app/models"
@@ -16,7 +15,9 @@ type Employee struct {
 type Login struct {
 	*revel.Controller
 }
-
+type Logout struct {
+	*revel.Controller
+}
 func (c Employee) RegisterEmp() revel.Result {
 	reqBody:=c.Request
 	err:=reqBody.ParseForm()
@@ -59,4 +60,21 @@ func (c Login) login() revel.Result {
 	}
 
 	return c.RenderText("ErrUnauthorized")
+}
+
+func (c Logout) logout() revel.Result {
+
+	token := c.Request.GetHttpHeader("Authorization")
+	if token == "" {
+		log.Fatal("Authorization token was not provided")
+
+		return c.RenderText("Authorization Token is required")
+
+	}
+
+	delete(c.Session,"token")
+
+
+	c.RenderText( "Done")
+
 }
