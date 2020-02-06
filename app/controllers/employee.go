@@ -35,6 +35,14 @@ func (c Employee) RegisterEmp() revel.Result {
 		RegistrationAt: time.Now().Unix(),
 
 	}
+	emailCheck:=models.IsEmailExist(emp.Email)
+	phoneCheck:=models.IsPhoneExist(emp.Phone)
+	if emailCheck{
+		return c.RenderText("Email already is used ")
+	}
+	if phoneCheck{
+		return c.RenderText("Phone already is used ")
+	}
 	empRegister :=models.RegisterEmp(emp)
 	if empRegister ==true{
 		return c.RenderText("User successfully register ")
