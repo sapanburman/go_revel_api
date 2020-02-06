@@ -50,8 +50,8 @@ func IsEmailExist(email string)bool{
 	var getEmail string
 	// Execute the query
 	err := dbconfig.DB.QueryRow("SELECT email FROM Employee WHERE email = ?", email).Scan(&getEmail)
-	if err != nil {
-		panic(err.Error())// proper error handling instead of panic in your app
+	if err != nil && err != sql.ErrNoRows {
+		log.Fatal(err)
 		return false
 	}
 	if getEmail==email{
@@ -64,8 +64,8 @@ func IsPhoneExist(phone string)bool{
 	var getPhone string
 	// Execute the query
 	err := dbconfig.DB.QueryRow("SELECT phone FROM Employee WHERE phone = ?", phone).Scan(&getPhone)
-	if err != nil {
-		panic(err.Error())// proper error handling instead of panic in your app
+	if err != nil && err != sql.ErrNoRows {
+		log.Fatal(err)
 		return false
 	}
 	if getPhone==phone{

@@ -39,16 +39,32 @@ func (c Employee) RegisterEmp() revel.Result {
 	emailCheck:=models.IsEmailExist(emp.Email)
 	phoneCheck:=models.IsPhoneExist(emp.Phone)
 	if emailCheck{
-		return c.RenderText("Email already is used ")
+		return c.RenderJSON(utils.ErrorRes{
+			Status:  "error",
+			Code:    401,
+			Message: "Email already used",
+		})
 	}
 	if phoneCheck{
-		return c.RenderText("Phone already is used ")
+		return  c.RenderJSON(utils.ErrorRes{
+			Status:  "error",
+			Code:    401,
+			Message: "Phone already used",
+		})
 	}
 	empRegister :=models.RegisterEmp(emp)
 	if empRegister ==true{
-		return c.RenderText("User successfully register ")
+		return c.RenderJSON(utils.ErrorRes{
+			Status:  "success",
+			Code:    200,
+			Message: "User successfully register ",
+		})
 	}
-	return c.RenderText("Somthing was wrong,Try later")
+	 return c.RenderJSON(utils.ErrorRes{
+		Status:  "error",
+		Code:    401,
+		Message: "Somthing was wrong ",
+	})
 }
 
 func (c Login) LoginEmp() revel.Result {
