@@ -8,7 +8,12 @@ module:testrunner
 
 
 GET      /                                     App.Index
-POST    /user                                  Employee.RegisterEmp
+POST    /register                              Employee.RegisterEmp
+POST    /login                                 Login.LoginEmp
+POST    /logout                                Logout.LogoutEmp
+POST    /token                                 JwtToken.Token
+
+
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/revel/revel"
 	"log"
+	"revelapi/app/controllers/services"
 	"revelapi/app/models"
 	"time"
 )
@@ -24,7 +25,7 @@ func (c Employee) RegisterEmp() revel.Result {
 	if err != nil {
 		log.Fatal(err)
 	}
-	hash,_:=HashPassword(reqBody.FormValue("password"))
+	hash,_:= services.HashPassword(reqBody.FormValue("password"))
 	emp := models.EmployeeData{
 		FirstName:      reqBody.FormValue("first_name"),
 		LastName:       reqBody.FormValue("last_name"),
@@ -41,7 +42,7 @@ func (c Employee) RegisterEmp() revel.Result {
 	return c.RenderText("Somthing was wrong,Try later")
 }
 
-func (c Login) login() revel.Result {
+func (c Login) LoginEmp() revel.Result {
 	reqBody:=c.Request
 	formData:=models.Credentials{
 		Password: reqBody.FormValue("password"),
@@ -49,20 +50,24 @@ func (c Login) login() revel.Result {
 	}
 
 	// Check in your db if the user exists or not
-	isValid:=models.CheckPass(formData)
-	if isValid{
-		tokens, err := models.GenerateTokenPair(formData.Email)
-		if err != nil {
-			return c.RenderText("Somthing was wrong")
+	getHash:=models.GetHashPass(formData)
+	if getHash !=""{
+		isValid:= services.CheckPasswordHash(formData.Password,getHash)
+		if isValid{
+			tokens, err := services.GenerateTokenPair(formData.Email)
+			if err != nil {
+				return c.RenderText("Somthing was wrong")
+			}
+
+			return c.RenderJSON(tokens)
 		}
 
-		return c.RenderJSON(tokens)
 	}
 
 	return c.RenderText("ErrUnauthorized")
 }
 
-func (c Logout) logout() revel.Result {
+func (c Logout) LogoutEmp() revel.Result {
 
 	token := c.Request.GetHttpHeader("Authorization")
 	if token == "" {
@@ -75,6 +80,7 @@ func (c Logout) logout() revel.Result {
 	delete(c.Session,"token")
 
 
-	c.RenderText( "Done")
+	return c.RenderText( "Done")
+
 
 }

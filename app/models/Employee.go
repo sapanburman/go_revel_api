@@ -1,13 +1,14 @@
 package models
 
 import (
+	"database/sql"
 	"fmt"
+	"log"
 	"revelapi/app/dbconfig"
 )
 
 
 type EmployeeData struct {
-
 	FirstName      string	`json:"first_name"`
 	LastName       string	`json:"last_name"`
 	Email          string	`json:"email"`
@@ -15,6 +16,25 @@ type EmployeeData struct {
 	Phone          string	`json:"phone"`
 	RegistrationAt int64	`json:"registration_at"`
 	UpdateAt       int64	`json:"update_at"`
+}
+
+// Create a struct to read the email and password from the request body
+type Credentials struct {
+	Password string `json:"password"`
+	Email string `json:"email"`
+}
+
+
+func GetHashPass(creds Credentials)string{
+	hashPass := &Credentials{}
+	// Get the existing entry present in the database for the given email
+	err := dbconfig.DB.QueryRow("SELECT password from Employee where email=?", creds.Email).Scan(&hashPass.Password)
+	if err != nil && err != sql.ErrNoRows {
+		log.Fatal(err)
+		return ""
+	}
+
+	return hashPass.Password
 }
 
 func RegisterEmp(empdata EmployeeData )bool{

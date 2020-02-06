@@ -1,18 +1,57 @@
-package controllers
+package services
 
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/revel/revel"
 	"log"
-	"revelapi/app/models"
+	"time"
 )
 
 
-type JWT_TOKEN struct {
+type JwtToken struct {
 	*revel.Controller
 }
-func (c JWT_TOKEN) token() revel.Result {
+
+// secret key (note: good practice get from env)
+var mySigningKey = []byte{4,5,6,78,8,5,67,9}
+
+func GenerateTokenPair(email string) (map[string]string, error) {
+	// Create token
+	token := jwt.New(jwt.SigningMethodHS256)
+
+	// Set claims
+	// This is the information which frontend can use
+	// The backend can also decode the token and get user etc.
+	claims := token.Claims.(jwt.MapClaims)
+	claims["email"] = email
+	claims["isDisabled"] = 0
+	claims["exp"] = time.Now().Add(time.Minute * 15).Unix()
+
+	// Generate encoded token and send it as response.
+	// The signing string should be secret (a generated UUID works too)
+	tokenString, err := token.SignedString(mySigningKey)
+	if err != nil {
+		return nil, err
+	}
+
+	refreshToken := jwt.New(jwt.SigningMethodHS256)
+	rtClaims := refreshToken.Claims.(jwt.MapClaims)
+	rtClaims["exp"] = time.Now().Add(time.Hour * 24).Unix()
+
+	refreshTokenString, err := refreshToken.SignedString(mySigningKey)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]string{
+		"access_token":  tokenString,
+		"refresh_token": refreshTokenString,
+	}, nil
+}
+
+
+func (c JwtToken) Token() revel.Result {
 	reqBody:=c.Request
 	err:=reqBody.ParseForm()
 	if err != nil {
@@ -45,7 +84,7 @@ func (c JWT_TOKEN) token() revel.Result {
 		// run through your business logic to verify if the user can log in
 		if int(claims["isDisabled"].(float64)) == 0 {
 
-			newTokenPair, err := models.GenerateTokenPair(eamil)
+			newTokenPair, err := GenerateTokenPair(eamil)
 			if err != nil {
 				return c.RenderText("Somthing was wrong")
 			}
