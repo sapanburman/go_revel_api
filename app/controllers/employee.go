@@ -4,6 +4,7 @@ import (
 	"github.com/revel/revel"
 	"log"
 	"revelapi/app/controllers/services"
+	"revelapi/app/controllers/utils"
 	"revelapi/app/models"
 	"time"
 )
@@ -67,12 +68,25 @@ func (c Login) LoginEmp() revel.Result {
 				return c.RenderText("Somthing was wrong")
 			}
 
-			return c.RenderJSON(tokens)
+			return c.RenderJSON(utils.SuccessRes{
+				Status:  "success",
+				Code:    200,
+				Data:    tokens,
+				Message: "User Successfully login",
+			})
 		}
-
+		c.RenderJSON(utils.ErrorRes{
+			Status:  "error",
+			Code:    401,
+			Message: "Email or Password Not Found",
+		})
 	}
 
-	return c.RenderText("ErrUnauthorized")
+	return c.RenderJSON(utils.ErrorRes{
+		Status:  "error",
+		Code:    401,
+		Message: "Email or Password Not Found",
+	})
 }
 
 func (c Logout) LogoutEmp() revel.Result {
