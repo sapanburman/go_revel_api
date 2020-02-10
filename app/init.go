@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/revel/revel"
+	"revelapi/app/controllers/services"
 	"revelapi/app/dbconfig"
 )
 
@@ -28,7 +29,9 @@ func init() {
 		revel.InterceptorFilter,       // Run interceptors around the action.
 		revel.CompressFilter,          // Compress the result.
 		revel.BeforeAfterFilter,       // Call the before and after filter functions
-		revel.ActionInvoker,           // Invoke the action.
+		revel.ActionInvoker, // Invoke the action.
+		services.Authenticator,
+
 	}
 
 	// Register startup functions with OnAppStart

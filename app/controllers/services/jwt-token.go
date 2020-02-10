@@ -15,6 +15,8 @@ type JwtToken struct {
 
 // secret key (note: good practice get from env)
 var mySigningKey = []byte{4,5,6,78,8,5,67,9}
+var myRefreshKey = []byte{4,5,6,78,8,5,67,9}
+
 
 func GenerateTokenPair(email string) (map[string]string, error) {
 	// Create token
@@ -37,12 +39,15 @@ func GenerateTokenPair(email string) (map[string]string, error) {
 
 	refreshToken := jwt.New(jwt.SigningMethodHS256)
 	rtClaims := refreshToken.Claims.(jwt.MapClaims)
+	rtClaims["isDisabled"] = 0
 	rtClaims["exp"] = time.Now().Add(time.Hour * 24).Unix()
 
 	refreshTokenString, err := refreshToken.SignedString(mySigningKey)
 	if err != nil {
 		return nil, err
 	}
+
+
 
 	return map[string]string{
 		"access_token":  tokenString,
@@ -63,7 +68,6 @@ func (c JwtToken) Token() revel.Result {
 	}
 	tokenReq := tokenReqBody{}
 	tokenReq.RefreshToken=reqBody.FormValue("refresh_token")
-
 	// Parse takes the token string and a function for looking up the key.
 	// The latter is especially useful if you use multiple keys for your application.
 	// The standard is to use 'kid' in the head of the token to identify
@@ -76,12 +80,13 @@ func (c JwtToken) Token() revel.Result {
 		}
 
 		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
-		return mySigningKey, nil
+		return myRefreshKey, nil
 	})
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		// Get the user record from database or
 		// run through your business logic to verify if the user can log in
+		fmt.Print(claims)
 		if int(claims["isDisabled"].(float64)) == 0 {
 
 			newTokenPair, err := GenerateTokenPair(eamil)
@@ -96,4 +101,13 @@ func (c JwtToken) Token() revel.Result {
 	}
 
 	return c.RenderText("check")
+}
+
+func Authenticator(c *revel.Controller, fc []revel.Filter) {
+	// If authentication found (from session), pass to next Filter in stack
+	// If not, redirect to your authentication UI, and pass
+	// Or handle other parts of authentication requests...
+	// If authentication succeeded, save it to session
+
+	// Otherwise just drop the request (probably log?)
 }

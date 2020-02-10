@@ -73,7 +73,7 @@ func (c Login) LoginEmp() revel.Result {
 		Password: reqBody.FormValue("password"),
 		Email:    reqBody.FormValue("email"),
 	}
-
+	c.Session["email"] = formData.Email
 	// Check in your db if the user exists or not
 	getHash:=models.GetHashPass(formData)
 	if getHash !=""{
